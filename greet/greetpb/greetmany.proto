@@ -1,0 +1,20 @@
+syntax = "proto3";
+package greetmany;
+
+option go_package="greet/greetpb";
+
+message GreetingMany{
+    string first_name = 1;
+    string last_name = 2;
+}
+message GreetManyRequest {
+    GreetingMany greeting = 1;
+}
+
+message GreetManyResponse {
+    string result = 1;
+}
+
+service GreetMany {
+    rpc Greet(GreetManyRequest) returns (stream GreetManyResponse){};
+}
