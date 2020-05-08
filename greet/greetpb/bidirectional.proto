@@ -1,0 +1,19 @@
+syntax = "proto3";
+package bidirectional;
+option go_package = "greet/greetpb";
+
+message Person {
+    string name = 1;
+}
+
+message BidiRequest {
+    Person person = 1;
+}
+
+message BidiResponse {
+    string result = 1;
+}
+
+service BidiConv {
+    rpc Bidi(stream BidiRequest) returns (stream BidiResponse){};
+}
