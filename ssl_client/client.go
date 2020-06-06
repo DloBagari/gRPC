@@ -4,16 +4,19 @@ import (
 	"context"
 	"fmt"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+	"google.golang.org/grpc/credentials"
 	"grpc/greet/greetpb"
 	"log"
-	"time"
 )
 
 func main() {
 	// create a insecure connection
-	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
+	certFile := "ssl_files/ca.crt"
+	creds, sslErr := credentials.NewClientTLSFromFile(certFile, "")
+	if sslErr != nil {
+		log.Fatal(sslErr)
+	}
+	conn, err := grpc.Dial("localhost:50051", grpc.WithTransportCredentials(creds))
 	if err != nil {
 		log.Fatalf("failed to connected with server: %s", err)
 	}
@@ -28,19 +31,9 @@ func main() {
 	}
 	// set deadline
 	// Package context defines the Context type, which carries deadlines, cancellation signals, and other request-scoped values across API boundaries and between processes.
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-	resp, err := c.Greet(ctx, req)
+	resp, err := c.Greet(context.Background(), req)
 	if err != nil {
-		statusErr, ok := status.FromError(err)
-		if ok {
-			if statusErr.Code() == codes.DeadlineExceeded {
-				fmt.Println("deadline occur")
-			}
-		} else {
-			log.Fatal(err)
-		}
-		return
+		log.Fatal(err)
 	}
 	fmt.Println(resp.Result)
 }

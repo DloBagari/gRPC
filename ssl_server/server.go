@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"grpc/greet/greetpb"
 	"log"
 	"net"
@@ -34,7 +35,13 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	s := grpc.NewServer()
+	certFile := "ssl_files/server.crt"
+	keyFile := "ssl_files/server.pem"
+	creds, sslErr := credentials.NewServerTLSFromFile(certFile, keyFile)
+	if sslErr != nil {
+		log.Fatal(sslErr)
+	}
+	s := grpc.NewServer(grpc.Creds(creds))
 	//register a service
 	greetpb.RegisterGreetServiceServer(s, &server{})
 	if err := s.Serve(listener); err != nil {
